@@ -2,94 +2,144 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mystery Chest Game</title>
+    
+    <!-- 1. Telegram Web Apps Script ချိတ်ဆက်ခြင်း -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- 2. Adsgram Script ချိတ်ဆက်ခြင်း (ကြော်ငြာအတွက် မရှိမဖြစ်) -->
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
     <style>
-        body { margin: 0; padding: 0; background: linear-gradient(135deg, #141423, #080811); color: white; font-family: 'Segoe UI', Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: space-between; height: 100vh; overflow: hidden; user-select: none; }
-        .header { margin-top: 20px; font-size: 1.8rem; font-weight: bold; letter-spacing: 2px; color: #f39c12; }
-        .coins-display { background: rgba(255,255,255,0.1); padding: 8px 20px; border-radius: 20px; font-size: 1.2rem; font-weight: bold; margin-top: 5px; }
-        .chest-box { width: 180px; height: 180px; background: radial-gradient(circle, #f39c12, #d35400); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 4.5rem; cursor: pointer; transition: transform 0.1s; }
-        .chest-box:active { transform: scale(0.9); }
-        .open-btn { margin-top: 25px; padding: 12px 35px; background: #27ae60; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; }
-        .inventory { display: flex; gap: 10px; overflow-x: auto; padding: 10px; width: 90%; }
-        .card-slot { min-width: 75px; height: 100px; background: #2c3e50; border: 1px solid #7f8c8d; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; cursor: pointer; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        .chest-container {
+            margin: 30px 0;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .chest-container:active {
+            transform: scale(0.95);
+        }
+        .chest-icon {
+            font-size: 80px;
+        }
+        .btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #e67e22;
+        }
+        .btn:disabled {
+            background-color: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .status {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #bdc3c7;
+        }
     </style>
 </head>
 <body>
 
-    <div class="header">MYSTERY CHEST</div>
-    <div class="coins-display">💰 <span id="coin-count">0</span> COINS</div>
+    <h1>Mystery Chest Game 🎁</h1>
+    <p>ကြော်ငြာကြည့်ပြီး လျှို့ဝှက်သေတ္တာကို ဖွင့်လိုက်ပါ</p>
 
-    <div class="main-container">
-        <div class="chest-box" id="chest" onclick="openChest()">📦</div>
-        <button class="open-btn" onclick="openChest()">OPEN (FREE)</button>
+    <!-- သေတ္တာပုံစံပြသသည့်နေရာ -->
+    <div class="chest-container" id="chest-box">
+        <div class="chest-icon" id="chest-emoji">📦</div>
     </div>
 
-    <div class="inventory" id="inventory"></div>
+    <!-- ကြော်ငြာကြည့်ပြီး သေတ္တာဖွင့်မည့် ခလုတ် -->
+    <button class="btn" id="ad-button" onclick="watchAdAndOpenChest()">
+        WATCH ADS TO OPEN
+    </button>
+
+    <div class="status" id="status-text">သေတ္တာပိတ်ထားပါသည်</div>
 
     <script>
+        // Telegram Web App ကို စတင်ပတ်သက်ခြင်း
         const tg = window.Telegram.WebApp;
-        tg.expand();
-        
-        // Firebase URL ထည့်ပေးလိုက်ပါပြီ
-        const DATABASE_URL = "https://mystery-chest-game-default-rtdb.asia-southeast1.firebasedatabase.app/"; 
-        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "guest_123";
+        tg.expand(); // Screen ကို အပြည့်ချဲ့ပေးခြင်း
 
-        let coins = 0;
-        let myCards = [];
+        // 3. Adsgram ကို သင့်ရဲ့ Ad Unit ID (34291) ဖြင့် ချိတ်ဆက်ခြင်း
+        const adController = window.Adsgram.init({ blockId: "34291" });
 
-        async function loadData() {
-            const response = await fetch(`${DATABASE_URL}users/${userId}.json`);
-            const data = await response.json();
-            if(data) {
-                coins = data.coins || 0;
-                myCards = data.cards || [];
+        // ကြော်ငြာပြသပြီး သေတ္တာဖွင့်မည့် လုပ်ဆောင်ချက်
+        function watchAdAndOpenChest() {
+            const adButton = document.getElementById("ad-button");
+            const statusText = document.getElementById("status-text");
+
+            // ခလုတ်ကို ခေတ္တပိတ်ထားပြီး စာသားပြောင်းပါ
+            if (adButton) {
+                adButton.disabled = true;
+                adButton.innerText = "Loading Ad...";
             }
-            updateUI();
+            statusText.innerText = "ကြော်ငြာကို စနစ်က ခေါ်ယူနေပါသည်...";
+
+            // ကြော်ငြာကို စတင်ပြသခြင်း
+            adController.show()
+                .then((result) => {
+                    // ကြော်ငြာကို အဆုံးထိ ကြည့်ရှုပြီးသွားချိန် (Reward ပေးရန်)
+                    statusText.innerText = "ကြော်ငြာကြည့်ရှုမှု အောင်မြင်သည်။";
+                    openChest(); // သေတ္တာဖွင့်သည့် လုပ်ဆောင်ချက်ကို လှမ်းခေါ်ခြင်း
+                })
+                .catch((result) => {
+                    // ကြော်ငြာကြည့်နေတုန်း အမှားအယွင်းဖြစ်ခြင်း သို့မဟုတ် အသုံးပြုသူက ပိတ်ပစ်ခြင်း
+                    console.error("Adsgram Error or Skipped:", result);
+                    statusText.innerText = "ကြော်ငြာကြည့်ရှုမှု မအောင်မြင်ပါ။";
+                    alert("ဆုလာဘ်ရယူရန် ကြော်ငြာကို အဆုံးထိ ပြီးအောင်ကြည့်ပေးပါ။");
+                })
+                .finally(() => {
+                    // ခလုတ်ကို မူလအတိုင်း ပြန်ဖွင့်ပေးခြင်း
+                    if (adButton) {
+                        adButton.disabled = false;
+                        adButton.innerText = "WATCH ADS TO OPEN";
+                    }
+                });
         }
 
-        function saveData() {
-            fetch(`${DATABASE_URL}users/${userId}.json`, {
-                method: 'PUT',
-                body: JSON.stringify({ coins: coins, cards: myCards })
-            });
-        }
-
-        const cardPool = [
-            { id: 1, name: "Dragon", tier: "LEGENDARY", value: 50, icon: "🐲" },
-            { id: 2, name: "Phoenix", tier: "LEGENDARY", value: 50, icon: "🦅" },
-            { id: 3, name: "Sword", tier: "COMMON", value: 10, icon: "⚔️" }
-        ];
-
-        function updateUI() {
-            document.getElementById('coin-count').innerText = coins;
-            const inv = document.getElementById('inventory');
-            inv.innerHTML = '';
-            myCards.forEach((card, index) => {
-                const slot = document.createElement('div');
-                slot.className = `card-slot`;
-                slot.innerHTML = `<div>${card.icon}</div><div>${card.name}</div><div style="color:#f1c40f">+${card.value}</div>`;
-                slot.onclick = () => tradeCard(index);
-                inv.appendChild(slot);
-            });
-        }
-
+        // သေတ္တာအမှန်တကယ် ပွင့်သွားသည့် လုပ်ဆောင်ချက်
         function openChest() {
-            const rolled = cardPool[Math.floor(Math.random() * cardPool.length)];
-            myCards.push(rolled);
-            saveData();
-            updateUI();
-        }
+            const chestEmoji = document.getElementById("chest-emoji");
+            const statusText = document.getElementById("status-text");
+            const adButton = document.getElementById("ad-button");
 
-        function tradeCard(index) {
-            coins += myCards[index].value;
-            myCards.splice(index, 1);
-            saveData();
-            updateUI();
-        }
+            // အန်နီမေးရှင်းပုံစံ သေတ္တာဖွင့်ပြခြင်း
+            chestEmoji.innerText = "🔓🎁";
+            statusText.innerText = "🎉 ဝမ်းမြောက်ပါသည်! သေတ္တာပွင့်သွားပါပြီ။";
+            adButton.style.display = "none"; // ဖွင့်ပြီးသွားရင် ခလုတ်ကို ဖျောက်ထားခြင်း
 
-        loadData();
+            // ဒေတာဘေ့စ် (Firebase/Backend) ထဲသို့ အမှတ်လှမ်းပေါင်းလိုပါက ဒီနေရာတွင် ကုဒ်ထည့်နိုင်ပါသည်
+            console.log("User rewarded successfully.");
+        }
     </script>
 </body>
 </html>
