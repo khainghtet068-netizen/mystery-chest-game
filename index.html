@@ -49,29 +49,37 @@
         .page { display: none; text-align: center; }
         .page.active { display: block; }
 
-        .chest-icon { font-size: 100px; margin: 25px 0; transition: transform 0.2s; cursor: pointer; }
+        .chest-icon { font-size: 90px; margin: 15px 0; transition: transform 0.2s; cursor: pointer; }
         .chest-icon:active { transform: scale(0.9) rotate(5deg); }
         
         .btn {
             background: linear-gradient(135deg, #f39c12, #f1c40f);
-            color: #111; border: none; padding: 15px 35px;
-            font-size: 16px; font-weight: bold; border-radius: 25px;
+            color: #111; border: none; padding: 13px 30px;
+            font-size: 15px; font-weight: bold; border-radius: 25px;
             cursor: pointer; width: 80%; max-width: 300px;
             box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
             text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 20px;
         }
         .btn:disabled { background: #7f8c8d; color: #fff; cursor: not-allowed; box-shadow: none; }
 
         /* ========================================================
-           REAL MINI POKEMON CARD GRID DESIGN
+           REAL MINI POKEMON CARD STYLE (FROM IMAGE & BOX)
         ======================================================== */
+        .card-display-zone {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 230px;
+            margin-top: 10px;
+        }
+
         .pokemon-deck {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* ကတ်အသေးလေးတွေ ဘေးချင်းယှဉ်ပြရန် */
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             justify-items: center;
             margin-top: 20px;
-            padding: 0 5px;
         }
 
         /* Mini Card Base Shape */
@@ -87,8 +95,8 @@
             justify-content: space-between;
             box-sizing: border-box;
             background: #1e2544;
-            border: 2.5px solid #7f8c8d; /* ပုံမှန်ကတ်တွေအတွက် မီးခိုးရောင်ဘောင်အမှောင် */
-            transition: transform 0.2s;
+            border: 2.5px solid #7f8c8d; 
+            transition: transform 0.3s ease;
         }
 
         .card-inner {
@@ -142,17 +150,15 @@
             z-index: 10;
         }
 
-        /* ========================================================
-           LIGHTNING & FIRE GLOW EFFECTS (FOR GOOD CARDS)
-        ======================================================== */
-        
-        /* ၁။ ကတ်မကောင်းရင် ပုံမှန်လေးပဲပြမယ့် Common Cards */
+        /* --- THEME BORDERS --- */
         .poke-card.common-bug { border-color: #27ae60; }
         .poke-card.common-fire { border-color: #e67e22; }
         .poke-card.common-water { border-color: #2980b9; }
         .poke-card.common-normal { border-color: #7f8c8d; }
 
-        /* ၂။ ကတ်ကောင်းရင် မီးတွေလင်းထိန်ပီး Glow မယ့် Rare Card (Pikachu) */
+        /* ========================================================
+           LIGHTNING & FIRE GLOW EFFECTS FOR GOOD PULLS
+        ======================================================== */
         .poke-card.rare { 
             border-color: #f1c40f; 
             background: linear-gradient(135deg, #f1c40f, #1e2544);
@@ -160,10 +166,9 @@
         }
         @keyframes rareFlash {
             from { box-shadow: 0 0 8px #f1c40f; border-color: #f39c12; }
-            to { box-shadow: 0 0 20px #f1c40f, inset 0 0 10px #f1c40f; border-color: #fff; }
+            to { box-shadow: 0 0 22px #f1c40f, inset 0 0 10px #f1c40f; border-color: #fff; }
         }
 
-        /* ၃။ အကောင်းဆုံးကတ်ဆိုရင် အလင်းတန်းစုံနဲ့ အရမ်းလင်းမယ့် Legendary Card (Mewtwo) */
         .poke-card.legendary { 
             border-color: #9b59b6;
             background: linear-gradient(45deg, #8e44ad, #d63031, #2c3e50, #9b59b6);
@@ -180,14 +185,21 @@
             to { box-shadow: 0 0 35px #9b59b6, 0 0 20px #ff7675, inset 0 0 15px #9b59b6; border-color: #fff; }
         }
 
-        /* Input styling */
+        /* Pop Animation when box reveals card */
+        .pop-effect {
+            animation: cardPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes cardPopIn {
+            0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
         input {
             width: 80%; max-width: 300px; padding: 12px; margin: 10px 0; 
             border-radius: 8px; border: 1px solid #34495e;
             background-color: #1f233e; color: white; text-align: center;
         }
 
-        /* Navigation */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background-color: #151a33; height: 75px;
@@ -208,13 +220,19 @@
 
     <div class="content-container">
         
+        <!-- PAGE 1: BOX PAGE (UPDATED WITH REAL-TIME CARD POP DISPLAY) -->
         <div id="page-box" class="page active">
             <h2>Lucky Mystery Chest 🎁</h2>
-            <p style="color: #bdc3c7;">Crack chests to discover shiny Mini Cards!</p>
             <div class="chest-icon" id="chest-emoji">📦</div>
             <button class="btn" id="btn-open-chest" onclick="tryOpenChest()">OPEN CHEST (1 Energy)</button>
+            
+            <!-- Box ဖွင့်လိုက်ရင် ကတ်ထွက်လာမည့်နေရာ -->
+            <div class="card-display-zone" id="box-card-output">
+                <p style="color: #57606f; font-style: italic; font-size: 13px;">Open a chest to pull a card live here!</p>
+            </div>
         </div>
 
+        <!-- PAGE 2: ENERGY/EARN PAGE -->
         <div id="page-energy" class="page">
             <h2>Refill Energy ⚡</h2>
             <p style="color: #bdc3c7;">Unlock video ads to charge your energy vault.</p>
@@ -222,13 +240,14 @@
             <button class="btn" id="ad-button" onclick="watchAdForEnergy()">WATCH ADS (+3 Energy)</button>
         </div>
 
+        <!-- PAGE 3: BINDER ALBUM (FROM IMAGE 1000018322.jpg) -->
         <div id="page-cards" class="page">
             <h2>Your Mini Binder 🎴</h2>
             <p style="color: #bdc3c7; margin-bottom: 10px;">Good cards will flash with heavy neon effects!</p>
-            <div class="pokemon-deck" id="collection-container">
-                </div>
+            <div class="pokemon-deck" id="collection-container"></div>
         </div>
 
+        <!-- PAGE 4: WITHDRAW PAGE -->
         <div id="page-withdraw" class="page">
             <h2>Secure Withdrawal 💰</h2>
             <p>Exchange Rate: 1,000 Points = 1 USD₮</p>
@@ -262,13 +281,11 @@
 
         const adController = window.Adsgram.init({ blockId: "34291" });
 
-        // Internal Game State
         let points = 0;
         let energy = 5;
         let totalBonus = 0;
         let myCards = {};
 
-        // Mini Card Database Setup
         const pokemonDatabase = [
             { name: "Caterpie", emoji: "🐛", style: "common-bug", hp: "40HP", bonus: 2, minRoll: 1, maxRoll: 18 },
             { name: "Charmander", emoji: "🔥", style: "common-fire", hp: "60HP", bonus: 2, minRoll: 19, maxRoll: 36 },
@@ -293,12 +310,13 @@
             document.getElementById('bonus-points').innerText = totalBonus;
         }
 
-        // Drop Mechanic with Instant visual trigger
+        // Box Opening Page - Instant Card Pull Visualizer
         function tryOpenChest() {
             if (energy < 1) { alert("⚡ Energy depleted! Watch video ads inside the 'Earn' station."); return; }
 
             energy -= 1;
             document.getElementById('chest-emoji').innerText = "🔓🎁";
+            document.getElementById('box-card-output').innerHTML = `<p style="color: #f1c40f; font-weight:bold;">Opening Chest...</p>`;
 
             let roll = Math.floor(Math.random() * 100) + 1;
             let rewardCard = pokemonDatabase.find(p => roll >= p.minRoll && roll <= p.maxRoll);
@@ -312,14 +330,32 @@
             totalBonus += rewardCard.bonus;
             points += rewardCard.bonus;
 
+            // Box ဖွင့်လိုက်တာနဲ့ Card ကို အပြင်မှာ Pop up ပုံစံ ချက်ချင်းပြပေးခြင်း
             setTimeout(() => {
-                alert(`🃏 POKÉMON PULL!\n\nName: ${rewardCard.name} ${rewardCard.emoji}\nBonus Earned: +${rewardCard.bonus} Points`);
                 document.getElementById('chest-emoji').innerText = "📦";
+                
+                const outputZone = document.getElementById('box-card-output');
+                outputZone.innerHTML = `
+                    <div class="poke-card ${rewardCard.style} pop-effect">
+                        <div class="card-inner">
+                            <div class="card-header-info">
+                                <div>${rewardCard.name}</div>
+                                <div class="card-hp">${rewardCard.hp}</div>
+                            </div>
+                            <div class="card-img-window">
+                                ${rewardCard.emoji}
+                            </div>
+                            <div class="card-body-info">
+                                <div class="card-ability">⚡ +${rewardCard.bonus} Pts</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 updateUI();
             }, 600);
         }
 
-        // Render Cards Album Frame into 2-Column Mini Deck
+        // Binder Page Grid Renderer
         function renderCollection() {
             const container = document.getElementById('collection-container');
             container.innerHTML = "";
@@ -351,7 +387,6 @@
             });
         }
 
-        // Video Ads Section
         function watchAdForEnergy() {
             const adButton = document.getElementById("ad-button");
             adButton.disabled = true; adButton.innerText = "Loading Video Ad...";
@@ -364,7 +399,6 @@
                 .finally(() => { adButton.disabled = false; adButton.innerText = "WATCH ADS (+3 Energy)"; });
         }
 
-        // Withdrawal Setup
         function requestWithdraw() {
             const amount = parseInt(document.getElementById('withdraw-amount').value);
             const address = document.getElementById('wallet-address').value;
