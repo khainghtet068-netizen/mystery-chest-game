@@ -9,9 +9,9 @@
 
     <style>
         :root {
-            --bg-color: #111424;
-            --primary-color: #f39c12;
-            --card-bg: #1f233e;
+            --bg-color: #0c0f1d;
+            --primary-color: #f1c40f;
+            --card-bg: #151a33;
             --text-color: #ffffff;
         }
 
@@ -28,12 +28,13 @@
         }
 
         .header {
-            background-color: var(--card-bg);
+            background-color: #1a203f;
             padding: 15px;
             text-align: center;
             font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border-bottom: 2px solid #2c3e50;
         }
         .header span { color: var(--primary-color); }
         .sub-header { font-size: 12px; color: #a29bfe; margin-top: 5px; }
@@ -42,64 +43,155 @@
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 90px;
+            padding-bottom: 100px;
         }
 
         .page { display: none; text-align: center; }
         .page.active { display: block; }
 
-        .chest-icon { font-size: 100px; margin: 20px 0; }
+        .chest-icon { font-size: 100px; margin: 25px 0; transition: transform 0.2s; cursor: pointer; }
+        .chest-icon:active { transform: scale(0.9) rotate(5deg); }
+        
         .btn {
-            background-color: var(--primary-color);
-            color: white; border: none; padding: 15px 30px;
+            background: linear-gradient(135deg, #f39c12, #f1c40f);
+            color: #111; border: none; padding: 15px 35px;
             font-size: 16px; font-weight: bold; border-radius: 25px;
             cursor: pointer; width: 80%; max-width: 300px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        .btn:hover { background-color: #e67e22; }
-        .btn:disabled { background-color: #7f8c8d; cursor: not-allowed; box-shadow: none; }
+        .btn:disabled { background: #7f8c8d; color: #fff; cursor: not-allowed; box-shadow: none; }
 
-        /* Pokémon Card UI Design */
-        .card {
-            background-color: var(--card-bg); padding: 15px;
-            margin: 15px 0; border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-left: 5px solid #7f8c8d;
-        }
-        .card.common { border-left-color: #2ecc71; }
-        .card.rare { border-left-color: #3498db; }
-        .card.legendary { border-left-color: #9b59b6; animation: glow 1.5s infinite alternate; }
-
-        @keyframes glow {
-            from { box-shadow: 0 0 5px #9b59b6; }
-            to { box-shadow: 0 0 20px #9b59b6; }
+        /* ========================================================
+           REAL POKEMON TCG CARD DESIGN (CSS)
+        ======================================================== */
+        .pokemon-deck {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-top: 20px;
         }
 
-        .badge {
-            font-size: 11px; padding: 3px 8px; border-radius: 10px; color: white; font-weight: bold;
+        /* Base Real Card Shape */
+        .poke-card {
+            width: 240px;
+            height: 340px;
+            border-radius: 14px;
+            padding: 12px;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+            border: 4px solid #e0b034; /* Classic Pokemon Gold Border */
+            background: #1e2544;
+            transition: transform 0.3s ease;
         }
-        .badge.common { background-color: #2ecc71; }
-        .badge.rare { background-color: #3498db; }
-        .badge.legendary { background-color: #9b59b6; }
+        .poke-card:hover { transform: translateY(-5px) scale(1.02); }
 
+        /* Inside Card Texture Frame */
+        .card-inner {
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            height: 100%;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        /* Card Header (Name, HP, Element) */
+        .card-header-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 5px;
+        }
+        .card-hp { color: #ff7675; font-size: 12px; }
+
+        /* Card Image Window */
+        .card-img-window {
+            background: #0f1225;
+            border: 2px solid #bdc3c7;
+            height: 120px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 65px;
+            margin: 8px 0;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        /* Card Info/Description Area */
+        .card-body-info {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 11px;
+            text-align: left;
+            line-height: 1.4;
+        }
+        .card-ability { font-weight: bold; color: #f1c40f; margin-bottom: 3px; }
+        .card-count-badge {
+            position: absolute; top: -10px; right: -10px;
+            background: #e74c3c; color: white; font-size: 12px;
+            font-weight: bold; padding: 4px 9px; border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            border: 2px solid white;
+        }
+
+        /* --- THEME STYLES ACCORDING TO TYPE --- */
+        /* Bug Style (Caterpie) */
+        .poke-card.common-bug { background: linear-gradient(135deg, #27ae60, #111424); border-color: #2ecc71; }
+        /* Fire Style (Charmander) */
+        .poke-card.common-fire { background: linear-gradient(135deg, #d35400, #111424); border-color: #e67e22; }
+        /* Water Style (Squirtle) */
+        .poke-card.common-water { background: linear-gradient(135deg, #2980b9, #111424); border-color: #3498db; }
+        /* Flying Style (Pidgey) */
+        .poke-card.common-normal { background: linear-gradient(135deg, #7f8c8d, #111424); border-color: #b2bec3; }
+        /* Rare Style (Pikachu) */
+        .poke-card.rare { background: linear-gradient(135deg, #f1c40f, #23274a); border-color: #f39c12; }
+
+        /* Legendary Style Holo Foil Animation (Mewtwo) */
+        .poke-card.legendary { 
+            background: linear-gradient(45deg, #8e44ad, #2c3e50, #9b59b6, #111424);
+            background-size: 400% 400%;
+            animation: holoFoil 4s ease infinite, legendaryGlow 1.5s infinite alternate;
+            border-color: #d63031;
+        }
+
+        @keyframes holoFoil {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes legendaryGlow {
+            from { box-shadow: 0 0 20px rgba(155, 89, 182, 0.6); }
+            to { box-shadow: 0 0 35px rgba(214, 48, 49, 0.9); }
+        }
+
+        /* Input styling */
         input {
-            width: 80%; max-width: 300px; padding: 12px;
-            margin: 10px 0; border-radius: 8px; border: 1px solid #34495e;
-            background-color: var(--card-bg); color: white; text-align: center;
+            width: 80%; max-width: 300px; padding: 12px; margin: 10px 0; 
+            border-radius: 8px; border: 1px solid #34495e;
+            background-color: #1f233e; color: white; text-align: center;
         }
 
+        /* Navigation */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            background-color: var(--card-bg); height: 70px;
+            background-color: #151a33; height: 75px;
             display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid #2c3e50;
+            border-top: 2px solid #2c3e50;
         }
-        .nav-item {
-            color: #7f8c8d; cursor: pointer; font-size: 12px;
-            display: flex; flex-direction: column; align-items: center;
-            flex: 1; text-decoration: none;
-        }
+        .nav-item { color: #7f8c8d; cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; flex: 1; }
         .nav-item .icon { font-size: 22px; margin-bottom: 4px; }
         .nav-item.active { color: var(--primary-color); font-weight: bold; }
     </style>
@@ -107,61 +199,37 @@
 <body>
 
     <div class="header">
-        💰 Points: <span id="global-points">0</span> | ⚡ Energy: <span id="global-energy">3</span>
-        <div class="sub-header">⚡ Chest Bonus multiplier: +<span id="bonus-points">0</span> Points</div>
+        💰 Points: <span id="global-points">0</span> | ⚡ Energy: <span id="global-energy">5</span>
+        <div class="sub-header">Current Card Buff: +<span id="bonus-points">0</span> Points/Chest</div>
     </div>
 
     <div class="content-container">
         
         <div id="page-box" class="page active">
-            <h2>Mystery Chest 🎁</h2>
-            <p>Open chests to get base points + your Pokemon card bonus!</p>
-            <div class="chest-icon" id="chest-emoji">📦</div>
+            <h2>Lucky Mystery Chest 🎁</h2>
+            <p style="color: #bdc3c7;">Crack the chest to collect authentic Pokémon TCG cards!</p>
+            <div class="chest-icon" id="chest-emoji" onclick="tryOpenChest()">📦</div>
             <button class="btn" id="btn-open-chest" onclick="tryOpenChest()">OPEN CHEST (1 Energy)</button>
         </div>
 
         <div id="page-energy" class="page">
             <h2>Refill Energy ⚡</h2>
-            <p>Watch video ads to get more energy to open chests</p>
+            <p style="color: #bdc3c7;">Unlock video ads to charge your energy vault.</p>
             <div style="font-size: 80px; margin: 20px;">🎬</div>
-            <button class="btn" id="ad-button" onclick="watchAdForEnergy()">WATCH ADS (+2 Energy)</button>
+            <button class="btn" id="ad-button" onclick="watchAdForEnergy()">WATCH ADS (+3 Energy)</button>
         </div>
 
         <div id="page-cards" class="page">
-            <h2>Pokémon Deck 💳</h2>
-            <p>Buy better Pokemon to get huge bonus points from chests!</p>
-            
-            <div class="card common">
-                <div style="text-align: left;">
-                    <b>Caterpie 🐛</b> <span class="badge common">Common</span><br>
-                    <small>Cost: 50 Points | Bonus: +2 Points/Chest</small>
+            <h2>Your Pokémon Binder 👾</h2>
+            <p style="color: #bdc3c7; margin-bottom: 25px;">Your active real-designed trading card collection.</p>
+            <div class="pokemon-deck" id="collection-container">
                 </div>
-                <button class="btn" id="btn-buy-caterpie" style="width:auto; padding: 8px 15px;" onclick="buyPokemon('Caterpie', 50, 2)">Buy</button>
-            </div>
-
-            <div class="card rare">
-                <div style="text-align: left;">
-                    <b>Pikachu ⚡</b> <span class="badge rare">Rare</span><br>
-                    <small>Cost: 250 Points | Bonus: +5 Points/Chest</small>
-                </div>
-                <button class="btn" id="btn-buy-pikachu" style="width:auto; padding: 8px 15px;" onclick="buyPokemon('Pikachu', 250, 5)">Buy</button>
-            </div>
-
-            <div class="card legendary">
-                <div style="text-align: left;">
-                    <b>Mewtwo 🔮</b> <span class="badge legendary">Legendary</span><br>
-                    <small>Cost: 1000 Points | Bonus: +20 Points/Chest</small>
-                </div>
-                <button class="btn" id="btn-buy-mewtwo" style="width:auto; padding: 8px 15px;" onclick="buyPokemon('Mewtwo', 1000, 20)">Buy</button>
-            </div>
         </div>
 
         <div id="page-withdraw" class="page">
-            <h2>Withdraw Balance 💰</h2>
-            <p>Rate: 1,000 Points = 1 USD₮</p>
+            <h2>Secure Withdrawal 💰</h2>
+            <p>Exchange Rate: 1,000 Points = 1 USD₮</p>
             <div style="font-size: 60px; margin: 10px;">🏦</div>
-            <p style="font-size: 13px; color: #bdc3c7;">Minimum payout limit is 1,000 Points.</p>
-            
             <input type="number" id="withdraw-amount" placeholder="Enter Points Amount">
             <input type="text" id="wallet-address" placeholder="Enter USDT (TON) Address">
             <br><br>
@@ -178,10 +246,10 @@
             <div class="icon">⚡</div><div>Earn</div>
         </div>
         <div class="nav-item" onclick="switchPage('page-cards', this)">
-            <div class="icon">👾</div><div>Pokémon</div>
+            <div class="icon">🎴</div><div>Binder</div>
         </div>
         <div class="nav-item" onclick="switchPage('page-withdraw', this)">
-            <div class="icon">💰</div><div>Withdraw</div>
+            <div class="icon">💰</div><div>Wallet</div>
         </div>
     </div>
 
@@ -191,124 +259,125 @@
 
         const adController = window.Adsgram.init({ blockId: "34291" });
 
-        // Game Variables
-        let points = 100; // Give 100 starting points for testing
+        // Internal Game State
+        let points = 0;
         let energy = 5;
-        let activeBonus = 0; // Current Pokémon bonus holder
-        let ownedPokemon = [];
+        let totalBonus = 0;
+        let myCards = {};
+
+        // Definitive Realistic Card Database
+        const pokemonDatabase = [
+            { name: "Caterpie", emoji: "🐛", style: "common-bug", type: "BUG", hp: "40 HP", bonus: 2, desc: "Its short feet are tipped with suction pads that enable it to tirelessly climb slopes.", minRoll: 1, maxRoll: 18 },
+            { name: "Charmander", emoji: "🔥", style: "common-fire", type: "FIRE", hp: "60 HP", bonus: 2, desc: "From the time it is born, a flame burns at the tip of its tail. Its life ends if the flame goes out.", minRoll: 19, maxRoll: 36 },
+            { name: "Squirtle", emoji: "💧", style: "common-water", type: "WATER", hp: "50 HP", bonus: 2, desc: "When it retracts its long neck into its shell, it squirts out water with vigorous force.", minRoll: 37, maxRoll: 54 },
+            { name: "Pidgey", emoji: "🦅", style: "common-normal", type: "FLYING", hp: "40 HP", bonus: 2, desc: "Very docile. If attacked, it will often kick up sand to protect itself rather than fight back.", minRoll: 55, maxRoll: 70 },
+            { name: "Pikachu", emoji: "⚡", style: "rare", type: "LIGHTNING", hp: "70 HP", bonus: 5, desc: "When several of these Pokémon gather, their electricity could build and cause lightning storms.", minRoll: 71, maxRoll: 95 },
+            { name: "Mewtwo", emoji: "🔮", style: "legendary", type: "PSYCHIC", hp: "120 HP", bonus: 20, desc: "A Pokémon created by recombining DNA. It is said to have the most savage heart among Pokémon.", minRoll: 96, maxRoll: 100 }
+        ];
 
         function switchPage(pageId, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
+            
+            if(pageId === 'page-cards') renderCollection();
         }
 
         function updateUI() {
             document.getElementById('global-points').innerText = points;
             document.getElementById('global-energy').innerText = energy;
-            document.getElementById('bonus-points').innerText = activeBonus;
-
-            // Disable buttons if already owned
-            if(ownedPokemon.includes('Caterpie')) document.getElementById('btn-buy-caterpie').innerText = "Owned";
-            if(ownedPokemon.includes('Pikachu')) document.getElementById('btn-buy-pikachu').innerText = "Owned";
-            if(ownedPokemon.includes('Mewtwo')) document.getElementById('btn-buy-mewtwo').innerText = "Owned";
+            document.getElementById('bonus-points').innerText = totalBonus;
         }
 
-        // PAGE 1: Open Chest Logic
+        // Drop Mechanics
         function tryOpenChest() {
-            if (energy >= 1) {
-                energy -= 1;
-                
-                // Base random reward (1 to 5 points)
-                let baseReward = Math.floor(Math.random() * 5) + 1; 
-                // Total Reward = Base + Pokemon Card Bonus
-                let totalReward = baseReward + activeBonus; 
-                
-                points += totalReward;
-                
-                document.getElementById('chest-emoji').innerText = "🔓🎁";
-                alert(`Chest opened! Base: +${baseReward} | Card Bonus: +${activeBonus}\nTotal Earned: +${totalReward} Points! 🎉`);
-                
-                setTimeout(() => {
-                    document.getElementById('chest-emoji').innerText = "📦";
-                }, 1500);
-                
-                updateUI();
+            if (energy < 1) { alert("⚡ Energy depleted! Watch video ads inside the 'Earn' station."); return; }
+
+            energy -= 1;
+            document.getElementById('chest-emoji').innerText = "🔓🎁";
+
+            let roll = Math.floor(Math.random() * 100) + 1;
+            let rewardCard = pokemonDatabase.find(p => roll >= p.minRoll && roll <= p.maxRoll);
+
+            if (myCards[rewardCard.name]) {
+                myCards[rewardCard.name].count += 1;
             } else {
-                alert("⚡ Out of energy! Go to 'Earn' tab to watch video ads.");
+                myCards[rewardCard.name] = { ...rewardCard, count: 1 };
             }
-        }
 
-        // PAGE 2: Adsgram Integration
-        function watchAdForEnergy() {
-            const adButton = document.getElementById("ad-button");
-            adButton.disabled = true;
-            adButton.innerText = "Loading Ad...";
+            totalBonus += rewardCard.bonus;
+            points += rewardCard.bonus;
 
-            adController.show()
-                .then(() => {
-                    energy += 3; // Give 3 energy
-                    alert("Ad completed! +3 Energy added successfully! ⚡");
-                    updateUI();
-                })
-                .catch((err) => {
-                    alert("Ad skipped or error. Please try again later.");
-                })
-                .finally(() => {
-                    adButton.disabled = false;
-                    adButton.innerText = "WATCH ADS (+3 Energy)";
-                });
-        }
-
-        // PAGE 3: Pokémon Shopping & Logic
-        function buyPokemon(name, cost, bonusValue) {
-            if (ownedPokemon.includes(name)) {
-                // If already owned, just activate it as the main bonus holder
-                activeBonus = bonusValue;
-                alert(`${name} is now your active partner Pokémon!`);
+            setTimeout(() => {
+                alert(`🃏 POKÉMON CARD UNLOCKED!\n\nName: ${rewardCard.name} ${rewardCard.emoji}\nRarity: ${rewardCard.type}\nMultiplier Effect: +${rewardCard.bonus} Points Boosted!`);
+                document.getElementById('chest-emoji').innerText = "📦";
                 updateUI();
+            }, 700);
+        }
+
+        // Render Cards Album Frame
+        function renderCollection() {
+            const container = document.getElementById('collection-container');
+            container.innerHTML = "";
+
+            if (Object.keys(myCards).length === 0) {
+                container.innerHTML = `<p style="color: #7f8c8d; margin-top: 40px;">Your Trading Card Binder is empty.<br>Crack Open Lucky Chests to pull cards!</p>`;
                 return;
             }
 
-            if (points >= cost) {
-                points -= cost;
-                ownedPokemon.push(name);
-                activeBonus = bonusValue; // Highest unlocked bonus becomes active
-                alert(`Awesome! You bought ${name}. You now get +${bonusValue} bonus points on every chest!`);
-                updateUI();
-            } else {
-                alert("Insufficient points! Open more mystery chests first.");
-            }
+            Object.values(myCards).forEach(card => {
+                const cardHTML = `
+                    <div class="poke-card ${card.style}">
+                        <div class="card-count-badge">x${card.count}</div>
+                        <div class="card-inner">
+                            <div class="card-header-info">
+                                <div>${card.name}</div>
+                                <div class="card-hp"><small>${card.hp}</small> 🟢</div>
+                            </div>
+                            <div class="card-img-window">
+                                ${card.emoji}
+                            </div>
+                            <div class="card-body-info">
+                                <div class="card-ability">✨ Passive Mine: +${card.bonus * card.count} Pts</div>
+                                <span style="color:#b2bec3; font-style: italic;">${card.desc}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+            });
         }
 
-        // PAGE 4: Cashout System
+        // Video Ads Section
+        function watchAdForEnergy() {
+            const adButton = document.getElementById("ad-button");
+            adButton.disabled = true; adButton.innerText = "Channelling Video Ad...";
+
+            adController.show()
+                .then(() => {
+                    energy += 3; alert("Refill Complete! +3 Chest Energy fueled! ⚡"); updateUI();
+                })
+                .catch(() => { alert("Ads Empty. Kindly retry once Adsgram block ID 34291 becomes Active."); })
+                .finally(() => { adButton.disabled = false; adButton.innerText = "WATCH ADS (+3 Energy)"; });
+        }
+
+        // Withdrawal Setup
         function requestWithdraw() {
             const amount = parseInt(document.getElementById('withdraw-amount').value);
             const address = document.getElementById('wallet-address').value;
 
-            if (!amount || !address) {
-                alert("Please fill in all details.");
-                return;
-            }
-            if (points < amount) {
-                alert("You don't have enough points.");
-                return;
-            }
-            if (amount < 1000) {
-                alert("Minimum withdraw limit is 1,000 Points.");
-                return;
-            }
+            if (!amount || !address) { alert("Invalid entries. Fill all credentials."); return; }
+            if (points < amount) { alert("Funds insufficient inside your balance."); return; }
+            if (amount < 1000) { alert("Minimum check-out cap is 1,000 Points."); return; }
 
             points -= amount;
-            alert(`Withdrawal Registered!\nPoints: ${amount} (${(amount/1000).toFixed(2)} USD\u20AE)\nAddress: ${address}\nStatus: Under 24h Review.`);
-            
+            alert(`Withdraw Order Filed!\nRequested Check-out: ${amount} Points\nTo Address: ${address}`);
             document.getElementById('withdraw-amount').value = "";
             document.getElementById('wallet-address').value = "";
             updateUI();
         }
 
-        // Initial UI Update on load
         updateUI();
     </script>
 </body>
