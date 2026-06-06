@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mystery Chest Game Ecosystem</title>
+    <title>Pokémon Chest Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
@@ -27,31 +27,28 @@
             overflow: hidden;
         }
 
-        /* Top Header - Score Display */
         .header {
             background-color: var(--card-bg);
             padding: 15px;
             text-align: center;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         .header span { color: var(--primary-color); }
+        .sub-header { font-size: 12px; color: #a29bfe; margin-top: 5px; }
 
-        /* Main Content Container */
         .content-container {
             flex: 1;
             overflow-y: auto;
             padding: 20px;
-            padding-bottom: 90px; /* Space for bottom nav */
+            padding-bottom: 90px;
         }
 
-        /* Pages View - Hide by default */
         .page { display: none; text-align: center; }
         .page.active { display: block; }
 
-        /* UI Elements */
-        .chest-icon { font-size: 100px; margin: 30px 0; }
+        .chest-icon { font-size: 100px; margin: 20px 0; }
         .btn {
             background-color: var(--primary-color);
             color: white; border: none; padding: 15px 30px;
@@ -63,26 +60,40 @@
         .btn:hover { background-color: #e67e22; }
         .btn:disabled { background-color: #7f8c8d; cursor: not-allowed; box-shadow: none; }
 
+        /* Pokémon Card UI Design */
         .card {
             background-color: var(--card-bg); padding: 15px;
             margin: 15px 0; border-radius: 12px;
             display: flex; justify-content: space-between; align-items: center;
+            border-left: 5px solid #7f8c8d;
+        }
+        .card.common { border-left-color: #2ecc71; }
+        .card.rare { border-left-color: #3498db; }
+        .card.legendary { border-left-color: #9b59b6; animation: glow 1.5s infinite alternate; }
+
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #9b59b6; }
+            to { box-shadow: 0 0 20px #9b59b6; }
         }
 
-        /* Input Field for Withdraw */
+        .badge {
+            font-size: 11px; padding: 3px 8px; border-radius: 10px; color: white; font-weight: bold;
+        }
+        .badge.common { background-color: #2ecc71; }
+        .badge.rare { background-color: #3498db; }
+        .badge.legendary { background-color: #9b59b6; }
+
         input {
             width: 80%; max-width: 300px; padding: 12px;
             margin: 10px 0; border-radius: 8px; border: 1px solid #34495e;
             background-color: var(--card-bg); color: white; text-align: center;
-            font-size: 14px;
         }
 
-        /* Bottom Navigation Bar */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
             background-color: var(--card-bg); height: 70px;
             display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid #2c3e50; box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+            border-top: 1px solid #2c3e50;
         }
         .nav-item {
             color: #7f8c8d; cursor: pointer; font-size: 12px;
@@ -97,43 +108,59 @@
 
     <div class="header">
         💰 Points: <span id="global-points">0</span> | ⚡ Energy: <span id="global-energy">3</span>
+        <div class="sub-header">⚡ Chest Bonus multiplier: +<span id="bonus-points">0</span> Points</div>
     </div>
 
     <div class="content-container">
         
         <div id="page-box" class="page active">
             <h2>Mystery Chest 🎁</h2>
-            <p>Open chests to earn special points!</p>
+            <p>Open chests to get base points + your Pokemon card bonus!</p>
             <div class="chest-icon" id="chest-emoji">📦</div>
             <button class="btn" id="btn-open-chest" onclick="tryOpenChest()">OPEN CHEST (1 Energy)</button>
         </div>
 
         <div id="page-energy" class="page">
-            <h2>Earn Energy ⚡</h2>
-            <p>Watch video ads to refill your energy</p>
+            <h2>Refill Energy ⚡</h2>
+            <p>Watch video ads to get more energy to open chests</p>
             <div style="font-size: 80px; margin: 20px;">🎬</div>
             <button class="btn" id="ad-button" onclick="watchAdForEnergy()">WATCH ADS (+2 Energy)</button>
         </div>
 
         <div id="page-cards" class="page">
-            <h2>Cards Shop 💳</h2>
-            <p>Upgrade and buy cards using your points</p>
+            <h2>Pokémon Deck 💳</h2>
+            <p>Buy better Pokemon to get huge bonus points from chests!</p>
             
-            <div class="card">
-                <div><b>Bronze Card 🥉</b><br><small>Cost: 100 Points</small></div>
-                <button class="btn" style="width:auto; padding: 8px 15px;" onclick="buyCard(100, 'Bronze')">Buy</button>
+            <div class="card common">
+                <div style="text-align: left;">
+                    <b>Caterpie 🐛</b> <span class="badge common">Common</span><br>
+                    <small>Cost: 50 Points | Bonus: +2 Points/Chest</small>
+                </div>
+                <button class="btn" id="btn-buy-caterpie" style="width:auto; padding: 8px 15px;" onclick="buyPokemon('Caterpie', 50, 2)">Buy</button>
             </div>
-            <div class="card">
-                <div><b>Silver Card 🥈</b><br><small>Cost: 500 Points</small></div>
-                <button class="btn" style="width:auto; padding: 8px 15px;" onclick="buyCard(500, 'Silver')">Buy</button>
+
+            <div class="card rare">
+                <div style="text-align: left;">
+                    <b>Pikachu ⚡</b> <span class="badge rare">Rare</span><br>
+                    <small>Cost: 250 Points | Bonus: +5 Points/Chest</small>
+                </div>
+                <button class="btn" id="btn-buy-pikachu" style="width:auto; padding: 8px 15px;" onclick="buyPokemon('Pikachu', 250, 5)">Buy</button>
+            </div>
+
+            <div class="card legendary">
+                <div style="text-align: left;">
+                    <b>Mewtwo 🔮</b> <span class="badge legendary">Legendary</span><br>
+                    <small>Cost: 1000 Points | Bonus: +20 Points/Chest</small>
+                </div>
+                <button class="btn" id="btn-buy-mewtwo" style="width:auto; padding: 8px 15px;" onclick="buyPokemon('Mewtwo', 1000, 20)">Buy</button>
             </div>
         </div>
 
         <div id="page-withdraw" class="page">
-            <h2>Withdraw 💰</h2>
+            <h2>Withdraw Balance 💰</h2>
             <p>Rate: 1,000 Points = 1 USD₮</p>
             <div style="font-size: 60px; margin: 10px;">🏦</div>
-            <p style="font-size: 14px; color: #bdc3c7;">Minimum withdrawal amount is 1,000 Points.</p>
+            <p style="font-size: 13px; color: #bdc3c7;">Minimum payout limit is 1,000 Points.</p>
             
             <input type="number" id="withdraw-amount" placeholder="Enter Points Amount">
             <input type="text" id="wallet-address" placeholder="Enter USDT (TON) Address">
@@ -151,7 +178,7 @@
             <div class="icon">⚡</div><div>Earn</div>
         </div>
         <div class="nav-item" onclick="switchPage('page-cards', this)">
-            <div class="icon">💳</div><div>Cards</div>
+            <div class="icon">👾</div><div>Pokémon</div>
         </div>
         <div class="nav-item" onclick="switchPage('page-withdraw', this)">
             <div class="icon">💰</div><div>Withdraw</div>
@@ -159,22 +186,20 @@
     </div>
 
     <script>
-        // Initialize Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        // Initialize Adsgram with your Block ID
         const adController = window.Adsgram.init({ blockId: "34291" });
 
-        // Game State
-        let points = 0;
-        let energy = 3;
+        // Game Variables
+        let points = 100; // Give 100 starting points for testing
+        let energy = 5;
+        let activeBonus = 0; // Current Pokémon bonus holder
+        let ownedPokemon = [];
 
-        // Tab Switch Logic
         function switchPage(pageId, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
-
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
         }
@@ -182,29 +207,40 @@
         function updateUI() {
             document.getElementById('global-points').innerText = points;
             document.getElementById('global-energy').innerText = energy;
+            document.getElementById('bonus-points').innerText = activeBonus;
+
+            // Disable buttons if already owned
+            if(ownedPokemon.includes('Caterpie')) document.getElementById('btn-buy-caterpie').innerText = "Owned";
+            if(ownedPokemon.includes('Pikachu')) document.getElementById('btn-buy-pikachu').innerText = "Owned";
+            if(ownedPokemon.includes('Mewtwo')) document.getElementById('btn-buy-mewtwo').innerText = "Owned";
         }
 
-        // PAGE 1: Open Chest
+        // PAGE 1: Open Chest Logic
         function tryOpenChest() {
             if (energy >= 1) {
                 energy -= 1;
-                let reward = Math.floor(Math.random() * 10) + 5; // Random 5 to 15 points
-                points += reward;
+                
+                // Base random reward (1 to 5 points)
+                let baseReward = Math.floor(Math.random() * 5) + 1; 
+                // Total Reward = Base + Pokemon Card Bonus
+                let totalReward = baseReward + activeBonus; 
+                
+                points += totalReward;
                 
                 document.getElementById('chest-emoji').innerText = "🔓🎁";
-                alert(`Chest opened successfully! You got +${reward} Points! 🎉`);
+                alert(`Chest opened! Base: +${baseReward} | Card Bonus: +${activeBonus}\nTotal Earned: +${totalReward} Points! 🎉`);
                 
                 setTimeout(() => {
                     document.getElementById('chest-emoji').innerText = "📦";
-                }, 2000);
+                }, 1500);
                 
                 updateUI();
             } else {
-                alert("⚡ Out of energy! Go to 'Earn' tab and watch ads to get more energy.");
+                alert("⚡ Out of energy! Go to 'Earn' tab to watch video ads.");
             }
         }
 
-        // PAGE 2: Watch Ads for Energy
+        // PAGE 2: Adsgram Integration
         function watchAdForEnergy() {
             const adButton = document.getElementById("ad-button");
             adButton.disabled = true;
@@ -212,57 +248,68 @@
 
             adController.show()
                 .then(() => {
-                    energy += 2;
-                    alert("Ad watched successfully! +2 Energy added! ⚡");
+                    energy += 3; // Give 3 energy
+                    alert("Ad completed! +3 Energy added successfully! ⚡");
                     updateUI();
                 })
                 .catch((err) => {
-                    alert("Ad failed or skipped. Please wait until Adsgram approves your block or try again later.");
+                    alert("Ad skipped or error. Please try again later.");
                 })
                 .finally(() => {
                     adButton.disabled = false;
-                    adButton.innerText = "WATCH ADS (+2 Energy)";
+                    adButton.innerText = "WATCH ADS (+3 Energy)";
                 });
         }
 
-        // PAGE 3: Buy Upgrades
-        function buyCard(cost, cardName) {
+        // PAGE 3: Pokémon Shopping & Logic
+        function buyPokemon(name, cost, bonusValue) {
+            if (ownedPokemon.includes(name)) {
+                // If already owned, just activate it as the main bonus holder
+                activeBonus = bonusValue;
+                alert(`${name} is now your active partner Pokémon!`);
+                updateUI();
+                return;
+            }
+
             if (points >= cost) {
                 points -= cost;
-                alert(`Success! You have purchased the ${cardName} Card.`);
+                ownedPokemon.push(name);
+                activeBonus = bonusValue; // Highest unlocked bonus becomes active
+                alert(`Awesome! You bought ${name}. You now get +${bonusValue} bonus points on every chest!`);
                 updateUI();
             } else {
-                alert("Not enough points! Open more chests to earn points.");
+                alert("Insufficient points! Open more mystery chests first.");
             }
         }
 
-        // PAGE 4: Cash Out / Withdrawal
+        // PAGE 4: Cashout System
         function requestWithdraw() {
             const amount = parseInt(document.getElementById('withdraw-amount').value);
             const address = document.getElementById('wallet-address').value;
 
             if (!amount || !address) {
-                alert("Please fill in all details before requesting withdrawal.");
+                alert("Please fill in all details.");
                 return;
             }
-
             if (points < amount) {
-                alert("Insufficient balance! You cannot withdraw more than you have.");
+                alert("You don't have enough points.");
                 return;
             }
-
             if (amount < 1000) {
-                alert("Minimum withdrawal limit is 1,000 Points.");
+                alert("Minimum withdraw limit is 1,000 Points.");
                 return;
             }
 
             points -= amount;
-            alert(`Withdrawal Request Received!\nAmount: ${amount} Points ($ ${(amount/1000).toFixed(2)} USD₮)\nTo Wallet: ${address}\nStatus: Processing (Takes up to 24 hours)`);
+            alert(`Withdrawal Registered!\nPoints: ${amount} (${(amount/1000).toFixed(2)} USD\u20AE)\nAddress: ${address}\nStatus: Under 24h Review.`);
             
             document.getElementById('withdraw-amount').value = "";
             document.getElementById('wallet-address').value = "";
             updateUI();
         }
+
+        // Initial UI Update on load
+        updateUI();
     </script>
 </body>
 </html>
