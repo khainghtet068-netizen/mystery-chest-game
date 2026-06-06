@@ -63,118 +63,121 @@
         .btn:disabled { background: #7f8c8d; color: #fff; cursor: not-allowed; box-shadow: none; }
 
         /* ========================================================
-           REAL POKEMON TCG CARD DESIGN (CSS)
+           REAL MINI POKEMON CARD GRID DESIGN
         ======================================================== */
         .pokemon-deck {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* ကတ်အသေးလေးတွေ ဘေးချင်းယှဉ်ပြရန် */
+            gap: 15px;
+            justify-items: center;
             margin-top: 20px;
+            padding: 0 5px;
         }
 
-        /* Base Real Card Shape */
+        /* Mini Card Base Shape */
         .poke-card {
-            width: 240px;
-            height: 340px;
-            border-radius: 14px;
-            padding: 12px;
+            width: 145px;
+            height: 210px;
+            border-radius: 10px;
+            padding: 6px;
             position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             box-sizing: border-box;
-            border: 4px solid #e0b034; /* Classic Pokemon Gold Border */
             background: #1e2544;
-            transition: transform 0.3s ease;
+            border: 2.5px solid #7f8c8d; /* ပုံမှန်ကတ်တွေအတွက် မီးခိုးရောင်ဘောင်အမှောင် */
+            transition: transform 0.2s;
         }
-        .poke-card:hover { transform: translateY(-5px) scale(1.02); }
 
-        /* Inside Card Texture Frame */
         .card-inner {
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
             height: 100%;
-            padding: 10px;
+            padding: 6px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             box-sizing: border-box;
+            background: rgba(15, 18, 37, 0.6);
         }
 
-        /* Card Header (Name, HP, Element) */
         .card-header-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 5px;
+            font-size: 11px;
         }
-        .card-hp { color: #ff7675; font-size: 12px; }
+        .card-hp { color: #ff7675; font-size: 9px; }
 
-        /* Card Image Window */
         .card-img-window {
-            background: #0f1225;
-            border: 2px solid #bdc3c7;
-            height: 120px;
-            border-radius: 6px;
+            background: #090b14;
+            border: 1px solid #57606f;
+            height: 75px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 65px;
-            margin: 8px 0;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+            font-size: 40px;
+            margin: 4px 0;
         }
 
-        /* Card Info/Description Area */
         .card-body-info {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 6px;
-            padding: 8px;
-            font-size: 11px;
-            text-align: left;
-            line-height: 1.4;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            padding: 5px;
+            font-size: 9px;
+            text-align: center;
         }
-        .card-ability { font-weight: bold; color: #f1c40f; margin-bottom: 3px; }
+        .card-ability { font-weight: bold; color: #f1c40f; }
+        
         .card-count-badge {
-            position: absolute; top: -10px; right: -10px;
-            background: #e74c3c; color: white; font-size: 12px;
-            font-weight: bold; padding: 4px 9px; border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-            border: 2px solid white;
+            position: absolute; top: -6px; right: -6px;
+            background: #e74c3c; color: white; font-size: 10px;
+            font-weight: bold; padding: 2px 7px; border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            border: 1px solid white;
+            z-index: 10;
         }
 
-        /* --- THEME STYLES ACCORDING TO TYPE --- */
-        /* Bug Style (Caterpie) */
-        .poke-card.common-bug { background: linear-gradient(135deg, #27ae60, #111424); border-color: #2ecc71; }
-        /* Fire Style (Charmander) */
-        .poke-card.common-fire { background: linear-gradient(135deg, #d35400, #111424); border-color: #e67e22; }
-        /* Water Style (Squirtle) */
-        .poke-card.common-water { background: linear-gradient(135deg, #2980b9, #111424); border-color: #3498db; }
-        /* Flying Style (Pidgey) */
-        .poke-card.common-normal { background: linear-gradient(135deg, #7f8c8d, #111424); border-color: #b2bec3; }
-        /* Rare Style (Pikachu) */
-        .poke-card.rare { background: linear-gradient(135deg, #f1c40f, #23274a); border-color: #f39c12; }
+        /* ========================================================
+           LIGHTNING & FIRE GLOW EFFECTS (FOR GOOD CARDS)
+        ======================================================== */
+        
+        /* ၁။ ကတ်မကောင်းရင် ပုံမှန်လေးပဲပြမယ့် Common Cards */
+        .poke-card.common-bug { border-color: #27ae60; }
+        .poke-card.common-fire { border-color: #e67e22; }
+        .poke-card.common-water { border-color: #2980b9; }
+        .poke-card.common-normal { border-color: #7f8c8d; }
 
-        /* Legendary Style Holo Foil Animation (Mewtwo) */
+        /* ၂။ ကတ်ကောင်းရင် မီးတွေလင်းထိန်ပီး Glow မယ့် Rare Card (Pikachu) */
+        .poke-card.rare { 
+            border-color: #f1c40f; 
+            background: linear-gradient(135deg, #f1c40f, #1e2544);
+            animation: rareFlash 1s ease-in-out infinite alternate;
+        }
+        @keyframes rareFlash {
+            from { box-shadow: 0 0 8px #f1c40f; border-color: #f39c12; }
+            to { box-shadow: 0 0 20px #f1c40f, inset 0 0 10px #f1c40f; border-color: #fff; }
+        }
+
+        /* ၃။ အကောင်းဆုံးကတ်ဆိုရင် အလင်းတန်းစုံနဲ့ အရမ်းလင်းမယ့် Legendary Card (Mewtwo) */
         .poke-card.legendary { 
-            background: linear-gradient(45deg, #8e44ad, #2c3e50, #9b59b6, #111424);
-            background-size: 400% 400%;
-            animation: holoFoil 4s ease infinite, legendaryGlow 1.5s infinite alternate;
-            border-color: #d63031;
+            border-color: #9b59b6;
+            background: linear-gradient(45deg, #8e44ad, #d63031, #2c3e50, #9b59b6);
+            background-size: 300% 300%;
+            animation: holoMoving 3s ease infinite, legendaryFire 1.2s infinite alternate;
         }
-
-        @keyframes holoFoil {
+        @keyframes holoMoving {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-        @keyframes legendaryGlow {
-            from { box-shadow: 0 0 20px rgba(155, 89, 182, 0.6); }
-            to { box-shadow: 0 0 35px rgba(214, 48, 49, 0.9); }
+        @keyframes legendaryFire {
+            from { box-shadow: 0 0 15px #9b59b6, 0 0 5px #e74c3c; }
+            to { box-shadow: 0 0 35px #9b59b6, 0 0 20px #ff7675, inset 0 0 15px #9b59b6; border-color: #fff; }
         }
 
         /* Input styling */
@@ -207,8 +210,8 @@
         
         <div id="page-box" class="page active">
             <h2>Lucky Mystery Chest 🎁</h2>
-            <p style="color: #bdc3c7;">Crack the chest to collect authentic Pokémon TCG cards!</p>
-            <div class="chest-icon" id="chest-emoji" onclick="tryOpenChest()">📦</div>
+            <p style="color: #bdc3c7;">Crack chests to discover shiny Mini Cards!</p>
+            <div class="chest-icon" id="chest-emoji">📦</div>
             <button class="btn" id="btn-open-chest" onclick="tryOpenChest()">OPEN CHEST (1 Energy)</button>
         </div>
 
@@ -220,8 +223,8 @@
         </div>
 
         <div id="page-cards" class="page">
-            <h2>Your Pokémon Binder 👾</h2>
-            <p style="color: #bdc3c7; margin-bottom: 25px;">Your active real-designed trading card collection.</p>
+            <h2>Your Mini Binder 🎴</h2>
+            <p style="color: #bdc3c7; margin-bottom: 10px;">Good cards will flash with heavy neon effects!</p>
             <div class="pokemon-deck" id="collection-container">
                 </div>
         </div>
@@ -265,14 +268,14 @@
         let totalBonus = 0;
         let myCards = {};
 
-        // Definitive Realistic Card Database
+        // Mini Card Database Setup
         const pokemonDatabase = [
-            { name: "Caterpie", emoji: "🐛", style: "common-bug", type: "BUG", hp: "40 HP", bonus: 2, desc: "Its short feet are tipped with suction pads that enable it to tirelessly climb slopes.", minRoll: 1, maxRoll: 18 },
-            { name: "Charmander", emoji: "🔥", style: "common-fire", type: "FIRE", hp: "60 HP", bonus: 2, desc: "From the time it is born, a flame burns at the tip of its tail. Its life ends if the flame goes out.", minRoll: 19, maxRoll: 36 },
-            { name: "Squirtle", emoji: "💧", style: "common-water", type: "WATER", hp: "50 HP", bonus: 2, desc: "When it retracts its long neck into its shell, it squirts out water with vigorous force.", minRoll: 37, maxRoll: 54 },
-            { name: "Pidgey", emoji: "🦅", style: "common-normal", type: "FLYING", hp: "40 HP", bonus: 2, desc: "Very docile. If attacked, it will often kick up sand to protect itself rather than fight back.", minRoll: 55, maxRoll: 70 },
-            { name: "Pikachu", emoji: "⚡", style: "rare", type: "LIGHTNING", hp: "70 HP", bonus: 5, desc: "When several of these Pokémon gather, their electricity could build and cause lightning storms.", minRoll: 71, maxRoll: 95 },
-            { name: "Mewtwo", emoji: "🔮", style: "legendary", type: "PSYCHIC", hp: "120 HP", bonus: 20, desc: "A Pokémon created by recombining DNA. It is said to have the most savage heart among Pokémon.", minRoll: 96, maxRoll: 100 }
+            { name: "Caterpie", emoji: "🐛", style: "common-bug", hp: "40HP", bonus: 2, minRoll: 1, maxRoll: 18 },
+            { name: "Charmander", emoji: "🔥", style: "common-fire", hp: "60HP", bonus: 2, minRoll: 19, maxRoll: 36 },
+            { name: "Squirtle", emoji: "💧", style: "common-water", hp: "50HP", bonus: 2, minRoll: 37, maxRoll: 54 },
+            { name: "Pidgey", emoji: "🦅", style: "common-normal", hp: "40HP", bonus: 2, minRoll: 55, maxRoll: 70 },
+            { name: "Pikachu", emoji: "⚡", style: "rare", hp: "70HP", bonus: 5, minRoll: 71, maxRoll: 95 },
+            { name: "Mewtwo", emoji: "🔮", style: "legendary", hp: "120HP", bonus: 20, minRoll: 96, maxRoll: 100 }
         ];
 
         function switchPage(pageId, element) {
@@ -290,7 +293,7 @@
             document.getElementById('bonus-points').innerText = totalBonus;
         }
 
-        // Drop Mechanics
+        // Drop Mechanic with Instant visual trigger
         function tryOpenChest() {
             if (energy < 1) { alert("⚡ Energy depleted! Watch video ads inside the 'Earn' station."); return; }
 
@@ -310,19 +313,19 @@
             points += rewardCard.bonus;
 
             setTimeout(() => {
-                alert(`🃏 POKÉMON CARD UNLOCKED!\n\nName: ${rewardCard.name} ${rewardCard.emoji}\nRarity: ${rewardCard.type}\nMultiplier Effect: +${rewardCard.bonus} Points Boosted!`);
+                alert(`🃏 POKÉMON PULL!\n\nName: ${rewardCard.name} ${rewardCard.emoji}\nBonus Earned: +${rewardCard.bonus} Points`);
                 document.getElementById('chest-emoji').innerText = "📦";
                 updateUI();
-            }, 700);
+            }, 600);
         }
 
-        // Render Cards Album Frame
+        // Render Cards Album Frame into 2-Column Mini Deck
         function renderCollection() {
             const container = document.getElementById('collection-container');
             container.innerHTML = "";
 
             if (Object.keys(myCards).length === 0) {
-                container.innerHTML = `<p style="color: #7f8c8d; margin-top: 40px;">Your Trading Card Binder is empty.<br>Crack Open Lucky Chests to pull cards!</p>`;
+                container.innerHTML = `<p style="color: #7f8c8d; grid-column: span 2; margin-top: 40px;">Your Binder is currently empty.<br>Crack Open Lucky Chests!</p>`;
                 return;
             }
 
@@ -333,14 +336,13 @@
                         <div class="card-inner">
                             <div class="card-header-info">
                                 <div>${card.name}</div>
-                                <div class="card-hp"><small>${card.hp}</small> 🟢</div>
+                                <div class="card-hp">${card.hp}</div>
                             </div>
                             <div class="card-img-window">
                                 ${card.emoji}
                             </div>
                             <div class="card-body-info">
-                                <div class="card-ability">✨ Passive Mine: +${card.bonus * card.count} Pts</div>
-                                <span style="color:#b2bec3; font-style: italic;">${card.desc}</span>
+                                <div class="card-ability">⚡ +${card.bonus * card.count} Pts</div>
                             </div>
                         </div>
                     </div>
@@ -352,7 +354,7 @@
         // Video Ads Section
         function watchAdForEnergy() {
             const adButton = document.getElementById("ad-button");
-            adButton.disabled = true; adButton.innerText = "Channelling Video Ad...";
+            adButton.disabled = true; adButton.innerText = "Loading Video Ad...";
 
             adController.show()
                 .then(() => {
