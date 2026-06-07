@@ -3,151 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Chest Game</title>
+    <title>Mystery Chest Game</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Firebase Config အချက်အလက်များ
+        const firebaseConfig = {
+            apiKey: "AIzaSyCukcXNeuE_D2D5sKBJ", 
+            authDomain: "mystery-chest-game.firebaseapp.com",
+            databaseURL: "https://mystery-chest-game-default-rtdb.firebaseio.com",
+            projectId: "mystery-chest-game",
+            storageBucket: "mystery-chest-game.appspot.com",
+            messagingSenderId: "532167967422",
+            appId: "1:532167967422:web:05eaa5ff7d4f6a97837023"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Global အဖြစ် သတ်မှတ်ခြင်း
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbGet = get;
+    </script>
+
     <style>
-        :root {
-            --bg-color: #0c0f1d;
-            --primary-color: #f1c40f;
-            --card-bg: #151a33;
-            --text-color: #ffffff;
-        }
-
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .header {
-            background-color: #1a203f;
-            padding: 15px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            border-bottom: 2px solid #2c3e50;
-        }
+        :root { --bg-color: #0c0f1d; --primary-color: #f1c40f; --card-bg: #151a33; --text-color: #ffffff; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .header { background-color: #1a203f; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border-bottom: 2px solid #2c3e50; }
         .header span { color: var(--primary-color); }
         .sub-header { font-size: 12px; color: #a29bfe; margin-top: 5px; }
-
-        .content-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            padding-bottom: 100px;
-        }
-
+        .content-container { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
         .page { display: none; text-align: center; }
         .page.active { display: block; }
-
-        .chest-container {
-            position: relative;
-            height: 120px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-            perspective: 1000px;
-        }
-        .chest-icon {
-            font-size: 90px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            z-index: 5;
-        }
+        .chest-container { position: relative; height: 120px; display: flex; justify-content: center; align-items: center; margin: 20px 0; perspective: 1000px; }
+        .chest-icon { font-size: 90px; transition: all 0.3s ease; cursor: pointer; z-index: 5; }
         .shake { animation: chestShake 0.4s infinite; }
-        @keyframes chestShake {
-            0% { transform: rotate(0); }
-            25% { transform: rotate(5deg); }
-            50% { transform: rotate(0); }
-            75% { transform: rotate(-5deg); }
-            100% { transform: rotate(0); }
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #f39c12, #f1c40f);
-            color: #111; border: none; padding: 13px 30px;
-            font-size: 15px; font-weight: bold; border-radius: 25px;
-            cursor: pointer; width: 80%; max-width: 300px;
-            box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
-            text-transform: uppercase; letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
+        @keyframes chestShake { 0% { transform: rotate(0); } 25% { transform: rotate(5deg); } 50% { transform: rotate(0); } 75% { transform: rotate(-5deg); } 100% { transform: rotate(0); } }
+        .btn { background: linear-gradient(135deg, #f39c12, #f1c40f); color: #111; border: none; padding: 13px 30px; font-size: 15px; font-weight: bold; border-radius: 25px; cursor: pointer; width: 80%; max-width: 300px; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
         .btn:disabled { background: #7f8c8d; color: #fff; cursor: not-allowed; box-shadow: none; }
-
-        .card-display-zone {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 250px;
-            margin-top: 5px;
-        }
-
-        .poke-card {
-            width: 145px;
-            height: 210px;
-            border-radius: 10px;
-            padding: 6px;
-            position: relative;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.7);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            background: #1e2544;
-            border: 2.5px solid #7f8c8d;
-        }
-        .card-inner {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            height: 100%;
-            padding: 6px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            background: rgba(15, 18, 37, 0.6);
-        }
+        .card-display-zone { display: flex; justify-content: center; align-items: center; min-height: 250px; margin-top: 5px; }
+        
+        .poke-card { width: 145px; height: 210px; border-radius: 10px; padding: 6px; position: relative; box-shadow: 0 6px 15px rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: #1e2544; border: 2.5px solid #7f8c8d; }
+        .card-inner { border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; height: 100%; padding: 6px; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; background: rgba(15, 18, 37, 0.6); }
         .card-header-info { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 11px; }
         .card-hp { color: #ff7675; font-size: 9px; }
-        .card-img-window {
-            background: #090b14; border: 1px solid #57606f; height: 75px;
-            border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 4px 0;
-        }
+        .card-img-window { background: #090b14; border: 1px solid #57606f; height: 75px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 4px 0; }
         .card-body-info { background: rgba(0, 0, 0, 0.5); border-radius: 4px; padding: 5px; font-size: 9px; text-align: center; }
         .card-ability { font-weight: bold; color: #f1c40f; }
-        .card-count-badge {
-            position: absolute; top: -6px; right: -6px; background: #e74c3c; color: white;
-            font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4); border: 1px solid white; z-index: 10;
-        }
-
-        /* CARD STYLES BASED ON RARITY */
-        .poke-card.common { border-color: #7f8c8d; background: #1e2544; }
+        .card-count-badge { position: absolute; top: -6px; right: -6px; background: #e74c3c; color: white; font-size: 10px; font-weight: bold; padding: 2px 7px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.4); border: 1px solid white; z-index: 10; }
+        
+        .poke-card.common { border-color: #27ae60; background: #1e2544; box-shadow: 0 0 10px rgba(39, 174, 96, 0.4); }
         .poke-card.rare { border-color: #f1c40f; background: linear-gradient(135deg, #f1c40f, #1e2544); animation: rareFlash 1s ease-in-out infinite alternate; }
         .poke-card.legendary { border-color: #e74c3c; background: linear-gradient(45deg, #8e44ad, #d63031, #2c3e50, #9b59b6); background-size: 300% 300%; animation: holoMoving 3s ease infinite, legendaryFire 1.2s infinite alternate; }
-
+        
         @keyframes holoMoving { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes rareFlash { from { box-shadow: 0 0 8px #f1c40f; } to { box-shadow: 0 0 20px #f1c40f; border-color: #fff; } }
         @keyframes legendaryFire { from { box-shadow: 0 0 15px #9b59b6; } to { box-shadow: 0 0 35px #e74c3c, 0 0 15px #ff7675; border-color: #fff; } }
-
         .fly-up { animation: cardFlyIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes cardFlyIn {
-            0% { transform: translateY(50px) scale(0); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
+        @keyframes cardFlyIn { 0% { transform: translateY(50px) scale(0); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        
         .pokemon-deck { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; justify-items: center; margin-top: 20px; }
-
         input { width: 80%; max-width: 300px; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #34495e; background-color: #1f233e; color: white; text-align: center; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: #151a33; height: 75px; display: flex; justify-content: space-around; align-items: center; border-top: 2px solid #2c3e50; }
         .nav-item { color: #7f8c8d; cursor: pointer; font-size: 12px; display: flex; flex-direction: column; align-items: center; flex: 1; }
@@ -163,17 +85,11 @@
     </div>
 
     <div class="content-container">
-        
         <div id="page-box" class="page active">
             <h2>Lucky Mystery Chest 🎁</h2>
-            <div class="chest-container">
-                <div class="chest-icon" id="chest-emoji">📦</div>
-            </div>
+            <div class="chest-container"><div class="chest-icon" id="chest-emoji">📦</div></div>
             <button class="btn" id="btn-open-chest" onclick="tryOpenChest()">OPEN CHEST (1 Energy)</button>
-            
-            <div class="card-display-zone" id="box-card-output">
-                <p style="color: #57606f; font-style: italic; font-size: 13px;">Open the chest to reveal your Pokemon!</p>
-            </div>
+            <div class="card-display-zone" id="box-card-output"><p style="color: #57606f; font-style: italic; font-size: 13px;">Open the chest to reveal your Pokemon!</p></div>
         </div>
 
         <div id="page-energy" class="page">
@@ -183,7 +99,8 @@
         </div>
 
         <div id="page-cards" class="page">
-            <h2>Your Binder 🎴</h2>
+            <h2>Your Mini Binder 🎴</h2>
+            <p style="color: #a29bfe; font-size: 13px; margin: -10px 0 20px 0;">Good cards will flash with heavy neon effects!</p>
             <div class="pokemon-deck" id="collection-container"></div>
         </div>
 
@@ -195,28 +112,20 @@
             <br><br>
             <button class="btn" onclick="requestWithdraw()">WITHDRAW NOW</button>
         </div>
-
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchPage('page-box', this)">
-            <div class="icon">🎁</div><div>Box</div>
-        </div>
-        <div class="nav-item" onclick="switchPage('page-energy', this)">
-            <div class="icon">⚡</div><div>Earn</div>
-        </div>
-        <div class="nav-item" onclick="switchPage('page-cards', this)">
-            <div class="icon">🎴</div><div>Binder</div>
-        </div>
-        <div class="nav-item" onclick="switchPage('page-withdraw', this)">
-            <div class="icon">💰</div><div>Wallet</div>
-        </div>
+        <div class="nav-item active" onclick="switchPage('page-box', this)"><div class="icon">🎁</div><div>Box</div></div>
+        <div class="nav-item" onclick="switchPage('page-energy', this)"><div class="icon">⚡</div><div>Earn</div></div>
+        <div class="nav-item" onclick="switchPage('page-cards', this)"><div class="icon">🎴</div><div>Binder</div></div>
+        <div class="nav-item" onclick="switchPage('page-withdraw', this)"><div class="icon">💰</div><div>Wallet</div></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
+        const userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "guest_player_1";
         const adController = window.Adsgram.init({ blockId: "34291" });
 
         let points = 0;
@@ -224,117 +133,54 @@
         let totalBonus = 0;
         let myCards = {};
 
-        // LARGE 95 POKÉMON DATABASE DETAILED ACCORDING TO RARITY
         const pokemonDatabase = [
-            // === 15 LEGENDARY CARDS (တန်းကြီး အလွန်တန်ဖိုးကြီးကတ်များ - Drop Rate: 5%) ===
             { name: "Mewtwo", emoji: "🔮", style: "legendary", hp: "120HP", bonus: 50, minRoll: 1, maxRoll: 1 },
             { name: "Charizard", emoji: "🐉", style: "legendary", hp: "150HP", bonus: 50, minRoll: 2, maxRoll: 2 },
             { name: "Lugia", emoji: "🦅", style: "legendary", hp: "130HP", bonus: 40, minRoll: 3, maxRoll: 3 },
             { name: "Rayquaza", emoji: "🐲", style: "legendary", hp: "140HP", bonus: 40, minRoll: 4, maxRoll: 4 },
             { name: "Arceus", emoji: "🌟", style: "legendary", hp: "160HP", bonus: 50, minRoll: 5, maxRoll: 5 },
-            { name: "Dialga", emoji: "⏳", style: "legendary", hp: "130HP", bonus: 35, minRoll: 6, maxRoll: 6 },
-            { name: "Palkia", emoji: "🌌", style: "legendary", hp: "130HP", bonus: 35, minRoll: 7, maxRoll: 7 },
-            { name: "Giratina", emoji: "👻", style: "legendary", hp: "140HP", bonus: 40, minRoll: 8, maxRoll: 8 },
-            { name: "Kyogre", emoji: "🐳", style: "legendary", hp: "130HP", bonus: 35, minRoll: 9, maxRoll: 9 },
-            { name: "Groudon", emoji: "🌋", style: "legendary", hp: "130HP", bonus: 35, minRoll: 10, maxRoll: 10 },
-            { name: "Zapdos", emoji: "⚡", style: "legendary", hp: "100HP", bonus: 30, minRoll: 11, maxRoll: 11 },
-            { name: "Moltres", emoji: "🔥", style: "legendary", hp: "100HP", bonus: 30, minRoll: 12, maxRoll: 12 },
-            { name: "Articuno", emoji: "❄️", style: "legendary", hp: "100HP", bonus: 30, minRoll: 13, maxRoll: 13 },
-            { name: "Mew", emoji: "🐱", style: "legendary", hp: "90HP", bonus: 35, minRoll: 14, maxRoll: 14 },
-            { name: "Celebi", emoji: "🧚", style: "legendary", hp: "90HP", bonus: 35, minRoll: 15, maxRoll: 15 },
-
-            // === 20 RARE CARDS (အသင့်အတင့် တန်ဖိုးရှိကတ်များ - Drop Rate: 25%) ===
-            { name: "Pikachu", emoji: "⚡", style: "rare", hp: "70HP", bonus: 10, minRoll: 16, maxRoll: 17 },
-            { name: "Eevee", emoji: "🦊", style: "rare", hp: "60HP", bonus: 8, minRoll: 18, maxRoll: 19 },
-            { name: "Gengar", emoji: "😈", style: "rare", hp: "110HP", bonus: 12, minRoll: 20, maxRoll: 21 },
-            { name: "Lucario", emoji: "🐺", style: "rare", hp: "110HP", bonus: 12, minRoll: 22, maxRoll: 23 },
-            { name: "Gyara", emoji: "🐲", style: "rare", hp: "130HP", bonus: 15, minRoll: 24, maxRoll: 25 },
-            { name: "Snorlax", emoji: "🐻", style: "rare", hp: "140HP", bonus: 12, minRoll: 26, maxRoll: 27 },
-            { name: "Dragonite", emoji: "🐉", style: "rare", hp: "130HP", bonus: 15, minRoll: 28, maxRoll: 29 },
-            { name: "Bl ब्लास्ट", emoji: "🐢", style: "rare", hp: "120HP", bonus: 14, minRoll: 30, maxRoll: 31 },
-            { name: "Venusaur", emoji: "🐸", style: "rare", hp: "130HP", bonus: 14, minRoll: 32, maxRoll: 33 },
-            { name: "Machamp", emoji: "💪", style: "rare", hp: "110HP", bonus: 10, minRoll: 34, maxRoll: 35 },
-            { name: "Alakazam", emoji: "🥄", style: "rare", hp: "90HP", bonus: 12, minRoll: 36, maxRoll: 37 },
-            { name: "Lapras", emoji: "🦕", style: "rare", hp: "110HP", bonus: 10, minRoll: 38, maxRoll: 39 },
-            { name: "Tyranitar", emoji: "🦖", style: "rare", hp: "120HP", bonus: 13, minRoll: 40, maxRoll: 40 },
-            { name: "Salamence", emoji: "🦅", style: "rare", hp: "120HP", bonus: 13, minRoll: 41, maxRoll: 41 },
-            { name: "Metagross", emoji: "🤖", style: "rare", hp: "120HP", bonus: 13, minRoll: 42, maxRoll: 42 },
-            { name: "Gardevoir", emoji: "💃", style: "rare", hp: "110HP", bonus: 12, minRoll: 43, maxRoll: 43 },
-            { name: "Zoroark", emoji: "🦊", style: "rare", hp: "100HP", bonus: 11, minRoll: 44, maxRoll: 44 },
-            { name: "Greninja", emoji: "🥷", style: "rare", hp: "100HP", bonus: 14, minRoll: 45, maxRoll: 45 },
-            { name: "Scizor", emoji: "🦀", style: "rare", hp: "100HP", bonus: 11, minRoll: 46, maxRoll: 46 },
-            { name: "Steelix", emoji: "🐍", style: "rare", hp: "110HP", bonus: 10, minRoll: 47, maxRoll: 47 },
-
-            // === 60 COMMON CARDS (သာမန်တန်ဖိုးနည်းကတ်များ - Drop Rate: 70%) ===
-            { name: "Caterpie", emoji: "🐛", style: "common", hp: "40HP", bonus: 2, minRoll: 48, maxRoll: 48 },
-            { name: "Charmander", emoji: "🔥", style: "common", hp: "60HP", bonus: 3, minRoll: 49, maxRoll: 49 },
-            { name: "Squirtle", emoji: "💧", style: "common", hp: "50HP", bonus: 3, minRoll: 50, maxRoll: 50 },
-            { name: "Bulbasaur", emoji: "🌱", style: "common", hp: "50HP", bonus: 3, minRoll: 51, maxRoll: 51 },
-            { name: "Pidgey", emoji: "🦅", style: "common", hp: "40HP", bonus: 2, minRoll: 52, maxRoll: 52 },
-            { name: "Rattata", emoji: "🐀", style: "common", hp: "30HP", bonus: 1, minRoll: 53, maxRoll: 53 },
-            { name: "Zubat", emoji: "🦇", style: "common", hp: "40HP", bonus: 2, minRoll: 54, maxRoll: 54 },
-            { name: "Diglett", emoji: "🐹", style: "common", hp: "30HP", bonus: 2, minRoll: 55, maxRoll: 55 },
-            { name: "Meowth", emoji: "🐱", style: "common", hp: "40HP", bonus: 3, minRoll: 56, maxRoll: 56 },
-            { name: "Psyduck", emoji: "🦆", style: "common", hp: "60HP", bonus: 2, minRoll: 57, maxRoll: 57 },
-            { name: "Growlithe", emoji: "🐕", style: "common", hp: "60HP", bonus: 3, minRoll: 58, maxRoll: 58 },
-            { name: "Poliwag", emoji: "🌀", style: "common", hp: "40HP", bonus: 2, minRoll: 59, maxRoll: 59 },
-            { name: "Abra", emoji: "🦊", style: "common", hp: "40HP", bonus: 2, minRoll: 60, maxRoll: 60 },
-            { name: "Tentacool", emoji: "🦑", style: "common", hp: "40HP", bonus: 2, minRoll: 61, maxRoll: 61 },
-            { name: "Geodude", emoji: "🌑", style: "common", hp: "50HP", bonus: 2, minRoll: 62, maxRoll: 62 },
-            { name: "Ponyta", emoji: "🐴", style: "common", hp: "60HP", bonus: 3, minRoll: 63, maxRoll: 63 },
-            { name: "Slowpoke", emoji: "🦛", style: "common", hp: "60HP", bonus: 2, minRoll: 64, maxRoll: 64 },
-            { name: "Magnemite", emoji: "🧲", style: "common", hp: "40HP", bonus: 2, minRoll: 65, maxRoll: 65 },
-            { name: "Gastly", emoji: "💨", style: "common", hp: "30HP", bonus: 2, minRoll: 66, maxRoll: 66 },
-            { name: "Onix", emoji: "🪨", style: "common", hp: "90HP", bonus: 4, minRoll: 67, maxRoll: 68 },
-            { name: "Krabby", emoji: "🦀", style: "common", hp: "40HP", bonus: 2, minRoll: 69, maxRoll: 69 },
-            { name: "Voltorb", emoji: "🔴", style: "common", hp: "40HP", bonus: 2, minRoll: 70, maxRoll: 70 },
-            { name: "Cubone", emoji: "🦴", style: "common", hp: "50HP", bonus: 3, minRoll: 71, maxRoll: 71 },
-            { name: "Koffing", emoji: "💣", style: "common", hp: "50HP", bonus: 2, minRoll: 72, maxRoll: 72 },
-            { name: "Rhyhorn", emoji: "🦏", style: "common", hp: "80HP", bonus: 3, minRoll: 73, maxRoll: 73 },
-            { name: "Horsea", emoji: "🐴", style: "common", hp: "40HP", bonus: 2, minRoll: 74, maxRoll: 74 },
-            { name: "Goldeen", emoji: "🐟", style: "common", hp: "40HP", bonus: 2, minRoll: 75, maxRoll: 75 },
-            { name: "Staryu", emoji: "⭐", style: "common", hp: "40HP", bonus: 2, minRoll: 76, maxRoll: 76 },
-            { name: "Scyther", emoji: "🦗", style: "common", hp: "70HP", bonus: 4, minRoll: 77, maxRoll: 78 },
-            { name: "Magikarp", emoji: "🐟", style: "common", hp: "30HP", bonus: 1, minRoll: 79, maxRoll: 80 },
-            { name: "Ditto", emoji: "🧬", style: "common", hp: "50HP", bonus: 4, minRoll: 81, maxRoll: 81 },
-            { name: "Vaporeon", emoji: "🧜‍♀️", style: "common", hp: "110HP", bonus: 5, minRoll: 82, maxRoll: 82 },
-            { name: "Jolteon", emoji: "⚡", style: "common", hp: "90HP", bonus: 5, minRoll: 83, maxRoll: 83 },
-            { name: "Flareon", emoji: "🔥", style: "common", hp: "100HP", bonus: 5, minRoll: 84, maxRoll: 84 },
-            { name: "Chikorita", emoji: "🍃", style: "common", hp: "50HP", bonus: 3, minRoll: 85, maxRoll: 85 },
-            { name: "Cyndaquil", emoji: "🦔", style: "common", hp: "50HP", bonus: 3, minRoll: 86, maxRoll: 86 },
-            { name: "Totodile", emoji: "🐊", style: "common", hp: "50HP", bonus: 3, minRoll: 87, maxRoll: 87 },
-            { name: "Sentret", emoji: "🐿️", style: "common", hp: "40HP", bonus: 2, minRoll: 88, maxRoll: 88 },
-            { name: "Mareep", emoji: "🐑", style: "common", hp: "40HP", bonus: 2, minRoll: 89, maxRoll: 89 },
-            { name: "Marill", emoji: "🐭", style: "common", hp: "60HP", bonus: 3, minRoll: 90, maxRoll: 90 },
-            { name: "Sudowoodo", emoji: "🌳", style: "common", hp: "80HP", bonus: 4, minRoll: 91, maxRoll: 91 },
-            { name: "Aipom", emoji: "🐒", style: "common", hp: "60HP", bonus: 2, minRoll: 92, maxRoll: 92 },
-            { name: "Wooper", emoji: "🐸", style: "common", hp: "60HP", bonus: 2, minRoll: 93, maxRoll: 93 },
-            { name: "Murkrow", emoji: "🐦", style: "common", hp: "60HP", bonus: 3, minRoll: 94, maxRoll: 94 },
-            { name: "Wobbuffet", emoji: "🔵", style: "common", hp: "190HP", bonus: 4, minRoll: 95, maxRoll: 95 },
-            { name: "Shuckle", emoji: "🐢", style: "common", hp: "20HP", bonus: 3, minRoll: 96, maxRoll: 96 },
-            { name: "Swinub", emoji: "🐖", style: "common", hp: "50HP", bonus: 2, minRoll: 97, maxRoll: 97 },
-            { name: "Corsola", emoji: "🪸", style: "common", hp: "60HP", bonus: 3, minRoll: 98, maxRoll: 98 },
-            { name: "Delibird", emoji: "🐧", style: "common", hp: "60HP", bonus: 3, minRoll: 99, maxRoll: 99 },
-            { name: "Houndour", emoji: "🐕", style: "common", hp: "50HP", bonus: 3, minRoll: 100, maxRoll: 100 }
+            { name: "Pikachu", emoji: "⚡", style: "rare", hp: "70HP", bonus: 10, minRoll: 6, maxRoll: 30 },
+            { name: "Eevee", emoji: "🦊", style: "rare", hp: "60HP", bonus: 8, minRoll: 31, maxRoll: 50 },
+            { name: "Caterpie", emoji: "🐛", style: "common", hp: "40HP", bonus: 2, minRoll: 51, maxRoll: 75 },
+            { name: "Charmander", emoji: "🔥", style: "common", hp: "60HP", bonus: 4, minRoll: 76, maxRoll: 100 }
         ];
 
-        function saveGameState() {
-            localStorage.setItem('poke_points', points);
-            localStorage.setItem('poke_energy', energy);
-            localStorage.setItem('poke_bonus', totalBonus);
-            localStorage.setItem('poke_mycards', JSON.stringify(myCards));
+        // --- REALTIME DATABASE SYNCHRONIZATION ---
+        async function saveGameState() {
+            if (!window.db) return;
+            try {
+                await window.dbSet(window.dbRef(window.db, "players/" + userId), {
+                    points: points,
+                    energy: energy,
+                    totalBonus: totalBonus,
+                    myCards: JSON.stringify(myCards)
+                });
+                console.log("Data successfully synced to Cloud Realtime DB!");
+            } catch (e) { console.error("Error saving data: ", e); }
         }
 
-        function loadGameState() {
-            if (localStorage.getItem('poke_points') !== null) {
-                points = parseInt(localStorage.getItem('poke_points'));
-                energy = parseInt(localStorage.getItem('poke_energy'));
-                totalBonus = parseInt(localStorage.getItem('poke_bonus'));
-                myCards = JSON.parse(localStorage.getItem('poke_mycards'));
-            } else {
-                points = 0; energy = 5; totalBonus = 0; myCards = {};
-            }
-            updateUI();
+        async function loadGameState() {
+            setTimeout(async () => {
+                if (!window.db) { loadFallback(); return; }
+                try {
+                    const snapshot = await window.dbGet(window.dbRef(window.db, "players/" + userId));
+                    if (snapshot.exists()) {
+                        const data = snapshot.val();
+                        points = data.points || 0;
+                        energy = data.energy !== undefined ? data.energy : 5;
+                        totalBonus = data.totalBonus || 0;
+                        myCards = JSON.parse(data.myCards || "{}");
+                        console.log("Realtime Cloud data loaded!");
+                    } else {
+                        loadFallback();
+                    }
+                    updateUI();
+                } catch (e) { console.error("Error loading: ", e); loadFallback(); }
+            }, 1000);
+        }
+
+        function loadFallback() {
+            points = 0; energy = 5; totalBonus = 0; myCards = {}; updateUI();
         }
 
         function switchPage(pageId, element) {
@@ -352,19 +198,15 @@
         }
 
         function tryOpenChest() {
-            if (energy < 1) { alert("⚡ No energy left!"); return; }
-
+            if (energy < 1) { alert("⚡ Energy မလောက်တော့ပါဘူးဗျာ!"); return; }
             energy -= 1;
             const chest = document.getElementById('chest-emoji');
             const outputZone = document.getElementById('box-card-output');
-
             chest.classList.add('shake');
             outputZone.innerHTML = `<p style="color: #f1c40f; font-weight:bold;">Opening Chest...</p>`;
 
             let roll = Math.floor(Math.random() * 100) + 1;
             let rewardCard = pokemonDatabase.find(p => roll >= p.minRoll && roll <= p.maxRoll);
-
-            // Back-up layer if any edge case bounds
             if(!rewardCard) rewardCard = pokemonDatabase[pokemonDatabase.length - 1];
 
             if (myCards[rewardCard.name]) { myCards[rewardCard.name].count += 1; } 
@@ -374,38 +216,34 @@
             points += rewardCard.bonus;
 
             setTimeout(() => {
-                chest.classList.remove('shake');
-                chest.innerText = "🎊"; 
-
+                chest.classList.remove('shake'); chest.innerText = "🎊"; 
                 outputZone.innerHTML = `
                     <div class="poke-card ${rewardCard.style} fly-up">
                         <div class="card-inner">
-                            <div class="card-header-info">
-                                <div>${rewardCard.name}</div>
-                                <div class="card-hp">${rewardCard.hp}</div>
-                            </div>
+                            <div class="card-header-info"><div>${rewardCard.name}</div><div class="card-hp">${rewardCard.hp}</div></div>
                             <div class="card-img-window">${rewardCard.emoji}</div>
                             <div class="card-body-info"><div class="card-ability">⚡ +${rewardCard.bonus} Pts</div></div>
                         </div>
-                    </div>
-                `;
-                
+                    </div>`;
                 saveGameState();
                 updateUI();
-
                 setTimeout(() => { chest.innerText = "📦"; }, 2000);
             }, 800);
         }
 
         function renderCollection() {
-            const container = document.getElementById('collection-container');
-            container.innerHTML = "";
-            if (Object.keys(myCards).length === 0) {
-                container.innerHTML = `<p style="color: #7f8c8d; grid-column: span 2; margin-top: 40px;">No cards yet!</p>`;
-                return;
-            }
+            const container = document.getElementById('collection-container'); container.innerHTML = "";
+            if (Object.keys(myCards).length === 0) { container.innerHTML = `<p style="color: #7f8c8d; grid-column: span 2; margin-top: 40px;">ကတ်ပြားများ မရှိသေးပါဘူးဗျာ!</p>`; return; }
             Object.values(myCards).forEach(card => {
-                const cardHTML = `<div class="poke-card ${card.style}"><div class="card-count-badge">x${card.count}</div><div class="card-inner"><div class="card-header-info"><div>${card.name}</div><div class="card-hp">${card.hp}</div></div><div class="card-img-window">${card.emoji}</div><div class="card-body-info"><div class="card-ability">⚡ +${card.bonus * card.count} Pts</div></div></div></div>`;
+                const cardHTML = `
+                <div class="poke-card ${card.style}">
+                    <div class="card-count-badge">x${card.count}</div>
+                    <div class="card-inner">
+                        <div class="card-header-info"><div>${card.name}</div><div class="card-hp">${card.hp}</div></div>
+                        <div class="card-img-window">${card.emoji}</div>
+                        <div class="card-body-info"><div class="card-ability">⚡ +${card.bonus * card.count} Pts</div></div>
+                    </div>
+                </div>`;
                 container.innerHTML += cardHTML;
             });
         }
@@ -413,23 +251,15 @@
         function watchAdForEnergy() {
             const adButton = document.getElementById("ad-button");
             adButton.disabled = true; adButton.innerText = "Loading Ad...";
-            adController.show().then(() => { 
-                energy += 3; 
-                saveGameState();
-                updateUI(); 
-            })
-            .catch(() => { alert("Ad Failed."); })
-            .finally(() => { adButton.disabled = false; adButton.innerText = "WATCH ADS (+3 Energy)"; });
+            adController.show().then(() => { energy += 3; saveGameState(); updateUI(); })
+            .catch(() => { alert("Ad ပြသရန် အဆင်မပြေဖြစ်သွားပါပြီ။"); }).finally(() => { adButton.disabled = false; adButton.innerText = "WATCH ADS (+3 Energy)"; });
         }
 
         function requestWithdraw() {
             const amount = parseInt(document.getElementById('withdraw-amount').value);
             const address = document.getElementById('wallet-address').value;
-            if (!amount || !address || points < amount || amount < 1000) { alert("Invalid inputs."); return; }
-            points -= amount;
-            saveGameState();
-            alert(`Requested withdrawal of ${amount} Points.`);
-            updateUI();
+            if (!amount || !address || points < amount || amount < 1000) { alert("ဒေတာ ဖြည့်စွက်မှု မှားယွင်းနေပါသည် (အနည်းဆုံး ၁၀၀0 points ရှိရမည်)"); return; }
+            points -= amount; saveGameState(); alert(`Requested withdrawal of ${amount} Points. အောင်မြင်ပါသည်!`); updateUI();
         }
 
         loadGameState();
